@@ -1,6 +1,5 @@
 def printing():
-    print('coucou')
-    print('salut')
+    print('Waheee')
 
 
 def move():
