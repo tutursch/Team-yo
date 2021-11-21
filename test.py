@@ -1,5 +1,5 @@
 def printing():
-    print('Waheee')
+    print('Soif')
 
 
 def move():
