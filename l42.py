@@ -68,19 +68,43 @@ def detect_inrange(image, surface, lo, hi):
             points.append(np.array([int(x), int(y)]))
         else:
             break
+   
 
     return points, mask
 
+def init_corner():
+
+    VideoCapInit = cv2.VideoCapture(1)
+    ret, frame = VideoCapInit.read()
+
+    gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray_img = np.float32(gray_img)
+
+    corners = cv2.goodFeaturesToTrack(gray_img, 20, 0.1, 10)
+    corners = np.int0(corners)
+
+    corner_pos  = []
+
+    for corner in corners:
+        x, y = corner.ravel()
+        corner_pos.append(np.array([x,y]))
+        cv2.circle(frame, (x,y), 3, 255, -1)
+    print(len(corner_pos))
+
+    return corner_pos
+
 VideoCap = cv2.VideoCapture(1)
 KF = KalmanFilter(0.1, [0,0])
+
+initial_corners = init_corner()
+print(len(initial_corners))
 
 while(True):
     ret, frame = VideoCap.read()
     
     points_b, mask_b = detect_inrange(frame, 800, lo_blue, hi_blue)
     points_g, mask_g = detect_inrange(frame, 800, lo_green, hi_green)
-
-
+        
     etat = KF.predict().astype(np.int32)
 
     cv2.circle(frame, (int(etat[0]), int(etat[1])), 2, (0, 255, 0), 5)
@@ -99,8 +123,8 @@ while(True):
     cv2.imshow('image', frame)
     cv2.imshow('mask blue', mask_b)
     cv2.imshow('mask green', mask_g)
-
-    if cv2.waitKey(1)==ord('q'):
+    if cv2.waitKey(100)==ord('q'):
         VideoCap.release()
         cv2.destroyAllWindows()
         break
+
