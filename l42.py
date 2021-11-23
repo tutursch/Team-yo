@@ -46,9 +46,9 @@ class KalmanFilter(object):
 
         return self.E
 
-blue = 90
-lo_blue=np.array([blue-10, 50, 50])
-hi_blue=np.array([blue+10, 255, 255])
+
+lo_blue=np.array([80, 50, 50])
+hi_blue=np.array([100, 255, 255])
 green = 70
 lo_green = np.array([green-10, 100, 50])
 hi_green = np.array([green+10, 255, 255])
@@ -74,7 +74,7 @@ def detect_inrange(image, surface, lo, hi):
 
 def init_corner():
 
-    VideoCapInit = cv2.VideoCapture(1)
+    VideoCapInit = cv2.VideoCapture(0)
     ret, frame = VideoCapInit.read()
 
     gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -93,13 +93,13 @@ def init_corner():
 
     return corner_pos
 
-VideoCap = cv2.VideoCapture(1)
+VideoCap = cv2.VideoCapture(0)
 KF = KalmanFilter(0.1, [0,0])
 
-initial_corners = init_corner()
-print(len(initial_corners))
+#initial_corners = init_corner()
 
-while(True):
+
+def open_cam():
     ret, frame = VideoCap.read()
     
     points_b, mask_b = detect_inrange(frame, 800, lo_blue, hi_blue)
@@ -126,5 +126,4 @@ while(True):
     if cv2.waitKey(100)==ord('q'):
         VideoCap.release()
         cv2.destroyAllWindows()
-        break
-
+        return false
