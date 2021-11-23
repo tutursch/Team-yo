@@ -46,9 +46,9 @@ class KalmanFilter(object):
 
         return self.E
 
-
-lo_blue=np.array([80, 50, 50])
-hi_blue=np.array([100, 255, 255])
+blue = 90
+lo_blue=np.array([blue-10, 50, 50])
+hi_blue=np.array([blue+10, 255, 255])
 green = 70
 lo_green = np.array([green-10, 100, 50])
 hi_green = np.array([green+10, 255, 255])
