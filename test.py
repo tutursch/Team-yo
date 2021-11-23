@@ -2,7 +2,7 @@ import tdmclient.notebook
 
 
 def printing():
-    print('Soif')
+    print('cc')
 
 @onevent 
 def button_right():
