@@ -74,8 +74,10 @@ def detect_inrange(image, surface, lo, hi):
 
 def init_corner():
 
-    VideoCapInit = cv2.VideoCapture(0)
+    VideoCapInit = cv2.VideoCapture(1)
     ret, frame = VideoCapInit.read()
+    print("test")
+
 
     gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray_img = np.float32(gray_img)
@@ -89,21 +91,16 @@ def init_corner():
         x, y = corner.ravel()
         corner_pos.append(np.array([x,y]))
         cv2.circle(frame, (x,y), 3, 255, -1)
-    print(len(corner_pos))
-
     return corner_pos
 
-VideoCap = cv2.VideoCapture(0)
+VideoCap = cv2.VideoCapture(1)
 KF = KalmanFilter(0.1, [0,0])
-
-#initial_corners = init_corner()
-
 
 def open_cam():
     ret, frame = VideoCap.read()
     
     points_b, mask_b = detect_inrange(frame, 800, lo_blue, hi_blue)
-    points_g, mask_g = detect_inrange(frame, 800, lo_green, hi_green)
+    points_g, mask_g = detect_inrange(frame, 800, lo_green, hi_green)  
         
     etat = KF.predict().astype(np.int32)
 
@@ -126,4 +123,6 @@ def open_cam():
     if cv2.waitKey(100)==ord('q'):
         VideoCap.release()
         cv2.destroyAllWindows()
-        return false
+        return 0
+    return 1
+
