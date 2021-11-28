@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from VisGraph import *
 
 class KalmanFilter(object):
     def __init__(self, dt, point):
@@ -74,10 +75,8 @@ def detect_inrange(image, surface, lo, hi):
 
 def init_corner():
 
-    VideoCapInit = cv2.VideoCapture(1)
+    VideoCapInit = cv2.VideoCapture(0)
     ret, frame = VideoCapInit.read()
-    print("test")
-
 
     gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray_img = np.float32(gray_img)
@@ -91,9 +90,11 @@ def init_corner():
         x, y = corner.ravel()
         corner_pos.append(np.array([x,y]))
         cv2.circle(frame, (x,y), 3, 255, -1)
-    return corner_pos
+    cv2.imshow('image_corners', frame)
 
-VideoCap = cv2.VideoCapture(1)
+    return corner_pos, frame
+
+VideoCap = cv2.VideoCapture(0)
 KF = KalmanFilter(0.1, [0,0])
 
 def open_cam():
@@ -117,12 +118,72 @@ def open_cam():
     if(len(points_g)>0):
         cv2.circle(frame, (points_g[0][0], points_g[0][1]), 10, (255, 0, 0), 2)
 
-    cv2.imshow('image', frame)
-    cv2.imshow('mask blue', mask_b)
-    cv2.imshow('mask green', mask_g)
+    #cv2.imshow('image', frame)
+    #cv2.imshow('mask blue', mask_b)
+    #cv2.imshow('mask green', mask_g)
     if cv2.waitKey(100)==ord('q'):
         VideoCap.release()
         cv2.destroyAllWindows()
         return 0
     return 1
 
+def polygon(corner_pos, frame):
+    threshold = 30
+    #Grayscale
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    all_polys = []
+    index_ok = []
+
+    edged = cv2.Canny(gray, 30, 200)
+    contours, hierarchy = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    poly_found = 0
+    k = 0
+
+    for i in range(len(contours)):
+        polys = []
+        for j in range (len(contours[i])):
+                for l in range(len(corner_pos)):
+                    if((corner_pos[l][0]>(contours[i][j][0][0]-threshold)) and (corner_pos[l][0]<(contours[i][j][0][0]+threshold))):
+                         if((corner_pos[l][1]>(contours[i][j][0][1]-threshold)) and (corner_pos[l][1]<(contours[i][j][0][1]+threshold))):
+
+                            k = l
+                            if(k not in index_ok):
+                                index_ok.append(l)
+                                polys.append(corner_pos[l])
+
+        all_polys.append(polys)
+ 
+    for j in range(len(all_polys)):
+        print(all_polys[j])
+
+
+    cv2.imshow('Canny Edges After Contouring', edged)
+    cv2.waitKey(0)
+    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)  
+    cv2.imshow('Contours', frame)
+    cv2.waitKey(0)
+    
+    return all_polys
+
+corners_pos, frame = init_corner()
+poly = polygon(corners_pos, frame)
+poly.pop()
+
+polys_point = []
+all_polys_point = []
+
+
+for i in range(len(poly)):
+    for j in range(len(poly[i])):
+                polys_point.append(Point(poly[i][j][0]*1.1, poly[i][j][1]*1.1))
+    all_polys_point.append(polys_point)
+g = VisGraph()
+g.build(all_polys_point)
+shortest = g.shortest_path(Point(50,50), Point(600, 400))
+for i in range(len(shortest)):
+    cv2.circle(frame, (int(shortest[i].return_x()), int(shortest[i].return_y())), 10, (0, 0, 255), 2)
+print(shortest)
+cv2.imshow('image', frame)
+cv2.waitKey(0)
