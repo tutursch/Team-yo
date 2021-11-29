@@ -33,6 +33,12 @@ class Point(object):
         self.y = float(y)
         self.polygon_id = polygon_id
 
+    def return_x(self):
+        return self.x
+
+    def return_y (self):
+        return self.y
+
     def __eq__(self, point):
         return point and self.x == point.x and self.y == point.y
 

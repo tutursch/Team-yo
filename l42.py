@@ -167,9 +167,47 @@ def polygon(corner_pos, frame):
     
     return all_polys
 
+def zoom(all_polys):
+    nb_sommet = 0
+    sum_x = 0
+    sum_y = 0
+    for i in range(len(all_polys)):
+        for j in range(len(all_polys[i])):
+            nb_sommet += 1 
+            sum_x += all_polys[i][j][0]
+            sum_y += all_polys[i][j][1]
+        sum_x = sum_x/nb_sommet 
+        sum_y = sum_y/nb_sommet
+        for j in range(len(all_polys[i])):
+            if (all_polys[i][j][0] > sum_x and all_polys[i][j][1] > sum_y):
+                all_polys[i][j][0] = all_polys[i][j][0]*1.1 
+                all_polys[i][j][1] = all_polys[i][j][1]*1.1
+            if (all_polys[i][j][0] < sum_x and all_polys[i][j][1] > sum_y):
+                all_polys[i][j][0] = all_polys[i][j][0]/1.1 
+                all_polys[i][j][1] = all_polys[i][j][1]*1.1
+            if (all_polys[i][j][0] > sum_x and all_polys[i][j][1] < sum_y):
+                all_polys[i][j][0] = all_polys[i][j][0]*1.1 
+                all_polys[i][j][1] = all_polys[i][j][1]/1.1
+            if (all_polys[i][j][0] < sum_x and all_polys[i][j][1] < sum_y):
+                all_polys[i][j][0] = all_polys[i][j][0]/1.1 
+                all_polys[i][j][1] = all_polys[i][j][1]/1.1
+            if (all_polys[i][j][0] == sum_x):
+                if (all_polys[i][j][1] < sum_y):
+                    all_polys[i][j][1] = all_polys[i][j][1]/1.1
+                if (all_polys[i][j][1] > sum_y):
+                    all_polys[i][j][1] = all_polys[i][j][1]*1.1
+            if (all_polys[i][j][1] == sum_y):
+                if (all_polys[i][j][0] < sum_x):
+                    all_polys[i][j][0] = all_polys[i][j][0]/1.1
+                if (all_polys[i][j][0] > sum_x):
+                    all_polys[i][j][0] = all_polys[i][j][0]*1.1
+    return all_polys
+
 corners_pos, frame = init_corner()
 poly = polygon(corners_pos, frame)
 poly.pop()
+
+poly = zoom(poly)
 
 polys_point = []
 all_polys_point = []
@@ -177,7 +215,7 @@ all_polys_point = []
 
 for i in range(len(poly)):
     for j in range(len(poly[i])):
-                polys_point.append(Point(poly[i][j][0]*1.1, poly[i][j][1]*1.1))
+                polys_point.append(Point(poly[i][j][0], poly[i][j][1]))
     all_polys_point.append(polys_point)
 g = VisGraph()
 g.build(all_polys_point)
