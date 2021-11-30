@@ -720,9 +720,14 @@ class OpenEdges(object):
     def __getitem__(self, index):
         return self._open_edges[index]
 
-polys = [[Point(0.0,1.0), Point(3.0,1.0), Point(1.5,4.0)],
-         [Point(4.0,4.0), Point(7.0,4.0), Point(5.5,8.0)]]
+polys = [[Point(496, 315), Point(475, 387), Point(563, 422), Point(581, 348)],
+        [Point(317, 243), Point(245, 321), Point(338, 395), Point(408, 309)],
+        [Point(395, 163), Point(444, 210), Point(389, 250), Point(339, 204)],
+        [Point(566, 132), Point(511, 191), Point(613, 215)],
+        [Point(283, 106), Point(184, 112), Point(187, 190), Point(290, 181)],
+        [Point(393,  31), Point(396,  97), Point(474,  64)],
+        [Point(159,  51), Point(196,  14), Point(213,  77), Point(250,  38)]]
 g = VisGraph()
 g.build(polys)
-shortest = g.shortest_path(Point(1.5,0.0), Point(4.0, 6.0))
+shortest = g.shortest_path(Point(50,50), Point(600, 400))
 print (shortest)

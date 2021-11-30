@@ -81,7 +81,7 @@ def init_corner():
     gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray_img = np.float32(gray_img)
 
-    corners = cv2.goodFeaturesToTrack(gray_img, 20, 0.1, 10)
+    corners = cv2.goodFeaturesToTrack(gray_img, 45, 0.1, 10)
     corners = np.int0(corners)
 
     corner_pos  = []
@@ -118,13 +118,10 @@ def open_cam():
     if(len(points_g)>0):
         cv2.circle(frame, (points_g[0][0], points_g[0][1]), 10, (255, 0, 0), 2)
 
-    #cv2.imshow('image', frame)
-    #cv2.imshow('mask blue', mask_b)
+    cv2.imshow('image', frame)
+    cv2.imshow('mask blue', mask_b)
     #cv2.imshow('mask green', mask_g)
-    if cv2.waitKey(100)==ord('q'):
-        VideoCap.release()
-        cv2.destroyAllWindows()
-        return 0
+    cv2.waitKey(0)
     return 1
 
 def polygon(corner_pos, frame):
@@ -143,6 +140,9 @@ def polygon(corner_pos, frame):
 
     for i in range(len(contours)):
         polys = []
+        M = cv2.moments(contours[i])
+        cx = int(M['m10']/M['m00'])
+        cy = int(M['m01']/M['m00'])
         for j in range (len(contours[i])):
                 for l in range(len(corner_pos)):
                     if((corner_pos[l][0]>(contours[i][j][0][0]-threshold)) and (corner_pos[l][0]<(contours[i][j][0][0]+threshold))):
@@ -151,9 +151,14 @@ def polygon(corner_pos, frame):
                             k = l
                             if(k not in index_ok):
                                 index_ok.append(l)
+                                corner_pos[l][0] = (corner_pos[l][0]-cx)*1.5+cx
+                                corner_pos[l][1] = (corner_pos[l][1]-cy)*1.5+cy
                                 polys.append(corner_pos[l])
+                                cv2.circle(frame, (corner_pos[l][0], corner_pos[l][1]), 2, (111, 111, 111), 2)
+                               
 
-        all_polys.append(polys)
+        if (len(polys) != 0):
+            all_polys.append(polys)
  
     for j in range(len(all_polys)):
         print(all_polys[j])
@@ -167,56 +172,23 @@ def polygon(corner_pos, frame):
     
     return all_polys
 
-def zoom(all_polys):
-    nb_sommet = 0
-    sum_x = 0
-    sum_y = 0
-    for i in range(len(all_polys)):
-        for j in range(len(all_polys[i])):
-            nb_sommet += 1 
-            sum_x += all_polys[i][j][0]
-            sum_y += all_polys[i][j][1]
-        sum_x = sum_x/nb_sommet 
-        sum_y = sum_y/nb_sommet
-        for j in range(len(all_polys[i])):
-            if (all_polys[i][j][0] > sum_x and all_polys[i][j][1] > sum_y):
-                all_polys[i][j][0] = all_polys[i][j][0]*1.1 
-                all_polys[i][j][1] = all_polys[i][j][1]*1.1
-            if (all_polys[i][j][0] < sum_x and all_polys[i][j][1] > sum_y):
-                all_polys[i][j][0] = all_polys[i][j][0]/1.1 
-                all_polys[i][j][1] = all_polys[i][j][1]*1.1
-            if (all_polys[i][j][0] > sum_x and all_polys[i][j][1] < sum_y):
-                all_polys[i][j][0] = all_polys[i][j][0]*1.1 
-                all_polys[i][j][1] = all_polys[i][j][1]/1.1
-            if (all_polys[i][j][0] < sum_x and all_polys[i][j][1] < sum_y):
-                all_polys[i][j][0] = all_polys[i][j][0]/1.1 
-                all_polys[i][j][1] = all_polys[i][j][1]/1.1
-            if (all_polys[i][j][0] == sum_x):
-                if (all_polys[i][j][1] < sum_y):
-                    all_polys[i][j][1] = all_polys[i][j][1]/1.1
-                if (all_polys[i][j][1] > sum_y):
-                    all_polys[i][j][1] = all_polys[i][j][1]*1.1
-            if (all_polys[i][j][1] == sum_y):
-                if (all_polys[i][j][0] < sum_x):
-                    all_polys[i][j][0] = all_polys[i][j][0]/1.1
-                if (all_polys[i][j][0] > sum_x):
-                    all_polys[i][j][0] = all_polys[i][j][0]*1.1
-    return all_polys
+
 
 corners_pos, frame = init_corner()
 poly = polygon(corners_pos, frame)
-poly.pop()
 
-poly = zoom(poly)
-
-polys_point = []
 all_polys_point = []
 
+print(len(poly))
 
 for i in range(len(poly)):
+    polys_point = []
     for j in range(len(poly[i])):
                 polys_point.append(Point(poly[i][j][0], poly[i][j][1]))
     all_polys_point.append(polys_point)
+
+print(all_polys_point)
+
 g = VisGraph()
 g.build(all_polys_point)
 shortest = g.shortest_path(Point(50,50), Point(600, 400))
