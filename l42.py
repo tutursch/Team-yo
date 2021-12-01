@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from numpy.lib.twodim_base import mask_indices
 from VisGraph import *
 
 class KalmanFilter(object):
@@ -75,8 +76,7 @@ def detect_inrange(image, surface, lo, hi):
 
 def init_corner():
 
-    VideoCapInit = cv2.VideoCapture(0)
-    ret, frame = VideoCapInit.read()
+    ret, frame = VideoCap.read()
 
     gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray_img = np.float32(gray_img)
@@ -89,10 +89,8 @@ def init_corner():
     for corner in corners:
         x, y = corner.ravel()
         corner_pos.append(np.array([x,y]))
-        cv2.circle(frame, (x,y), 3, 255, -1)
-    cv2.imshow('image_corners', frame)
 
-    return corner_pos, frame
+    return corner_pos
 
 VideoCap = cv2.VideoCapture(0)
 KF = KalmanFilter(0.1, [0,0])
@@ -124,7 +122,9 @@ def open_cam():
     cv2.waitKey(0)
     return 1
 
-def polygon(corner_pos, frame):
+def polygon(corner_pos):
+
+    ret, frame = VideoCap.read()
     threshold = 30
     #Grayscale
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -141,8 +141,9 @@ def polygon(corner_pos, frame):
     for i in range(len(contours)):
         polys = []
         M = cv2.moments(contours[i])
-        cx = int(M['m10']/M['m00'])
-        cy = int(M['m01']/M['m00'])
+        if (M['m00']!=0):
+            cx = int(M['m10']/M['m00'])
+            cy = int(M['m01']/M['m00'])
         for j in range (len(contours[i])):
                 for l in range(len(corner_pos)):
                     if((corner_pos[l][0]>(contours[i][j][0][0]-threshold)) and (corner_pos[l][0]<(contours[i][j][0][0]+threshold))):
@@ -154,46 +155,86 @@ def polygon(corner_pos, frame):
                                 corner_pos[l][0] = (corner_pos[l][0]-cx)*1.5+cx
                                 corner_pos[l][1] = (corner_pos[l][1]-cy)*1.5+cy
                                 polys.append(corner_pos[l])
-                                cv2.circle(frame, (corner_pos[l][0], corner_pos[l][1]), 2, (111, 111, 111), 2)
                                
-
         if (len(polys) != 0):
             all_polys.append(polys)
- 
-    for j in range(len(all_polys)):
-        print(all_polys[j])
-
-
-    cv2.imshow('Canny Edges After Contouring', edged)
-    cv2.waitKey(0)
-    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)  
-    cv2.imshow('Contours', frame)
-    cv2.waitKey(0)
     
     return all_polys
 
+def detect_start_stop ():
+    start=[]
+    stop=[]
+    while(len(start)==0 or len(stop)==0):
+        ret, frame = VideoCap.read()
+        color_start = 107
+        color_stop = 60
+        color_info=(0, 0, 255)
+        lo_start = np.array([color_start-5, 100, 50])
+        hi_start = np.array([color_start+5, 255,255])
+        lo_stop = np.array([color_stop-5, 100, 50])
+        hi_stop = np.array([color_stop+5, 255,255])
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        image = cv2.blur(image, (5, 5))
+        mask_start = cv2.inRange(image, lo_start, hi_start)
+        mask_stop = cv2.inRange(image, lo_stop, hi_stop)
+        mask_start=cv2.erode(mask_start, None, iterations=2)
+        mask_start=cv2.dilate(mask_start, None, iterations=2)
+        mask_stop=cv2.erode(mask_stop, None, iterations=2)
+        mask_stop=cv2.dilate(mask_stop, None, iterations=2)
+        elements_start=cv2.findContours(mask_start, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        elements_start=sorted(elements_start, key=lambda x:cv2.contourArea(x), reverse=True)
+        elements_stop=cv2.findContours(mask_stop, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        elements_stop=sorted(elements_stop, key=lambda x:cv2.contourArea(x), reverse=True)
+        if len(elements_start) > 0:
+            c=max(elements_start, key=cv2.contourArea)
+            ((x, y), radius)=cv2.minEnclosingCircle(c)
+            if (len(start)==0):
+                start.append(np.array([int(x), int(y)]))
+        if len(elements_stop) > 0:
+            c=max(elements_stop, key=cv2.contourArea)
+            ((x, y), radius)=cv2.minEnclosingCircle(c)
+            if (len(stop)==0):
+                stop.append(np.array([int(x), int(y)]))
+    return start, stop
+ 
+def initialisation():
+    ret, frame = VideoCap.read()
+
+    corners_pos = init_corner()
+
+    poly = polygon(corners_pos)
+
+    start, stop = detect_start_stop()
+
+    all_polys_point = []
+
+    #transformation into the class point
+    for i in range(len(poly)):
+        polys_point = []
+        for j in range(len(poly[i])):
+            polys_point.append(Point(poly[i][j][0], poly[i][j][1]))
+        all_polys_point.append(polys_point)
+    start_point = Point(start[0][0], start[0][1])  
+    stop_point = Point(stop[0][0], stop[0][1]) 
+
+    g = VisGraph()
+    g.build(all_polys_point)
+    shortest = g.shortest_path(start_point, stop_point)
+
+    for corner in corners_pos:
+        x, y = corner.ravel()
+        cv2.circle(frame, (x,y), 3, 255, -1)
+
+    for i in range (len(poly)) :
+        for j in range (len(poly[i])) :
+            cv2.circle(frame, (poly[i][j][0], poly[i][j][1]), 3, 255, -1)
+        
+    for i in range(len(shortest)):
+        cv2.circle(frame, (int(shortest[i].return_x()), int(shortest[i].return_y())), 10, (0, 0, 255), 2)
+
+    cv2.imshow('image', frame)
+    cv2.waitKey(0)
+
+    return shortest
 
 
-corners_pos, frame = init_corner()
-poly = polygon(corners_pos, frame)
-
-all_polys_point = []
-
-print(len(poly))
-
-for i in range(len(poly)):
-    polys_point = []
-    for j in range(len(poly[i])):
-                polys_point.append(Point(poly[i][j][0], poly[i][j][1]))
-    all_polys_point.append(polys_point)
-
-print(all_polys_point)
-
-g = VisGraph()
-g.build(all_polys_point)
-shortest = g.shortest_path(Point(50,50), Point(600, 400))
-for i in range(len(shortest)):
-    cv2.circle(frame, (int(shortest[i].return_x()), int(shortest[i].return_y())), 10, (0, 0, 255), 2)
-print(shortest)
-cv2.imshow('image', frame)
-cv2.waitKey(0)
