@@ -153,8 +153,8 @@ def polygon(corner_pos):
                             k = l
                             if(k not in index_ok):
                                 index_ok.append(l)
-                                corner_pos[l][0] = (corner_pos[l][0]-cx)*1.5+cx
-                                corner_pos[l][1] = (corner_pos[l][1]-cy)*1.5+cy
+                                corner_pos[l][0] = (corner_pos[l][0]-cx)*2+cx
+                                corner_pos[l][1] = (corner_pos[l][1]-cy)*2+cy
                                 polys.append(corner_pos[l])
                                
         if (len(polys) != 0):
@@ -168,7 +168,7 @@ def detect_start_stop ():
     while(len(start)==0 or len(stop)==0):
         ret, frame = VideoCap.read()
         color_start = 107
-        color_stop = 60
+        color_stop = 40
         lo_start = np.array([color_start-5, 100, 50])
         hi_start = np.array([color_start+5, 255,255])
         lo_stop = np.array([color_stop-5, 100, 50])
@@ -235,7 +235,8 @@ def initialisation():
     cv2.imshow('image', frame)
     cv2.waitKey(0)
 
-    return shortest
+    #transformation into numpy
+    for i in range (len(shortest)):
+        shortest[i] = [shortest[i].return_x(), shortest[i].return_y()]
 
-shortest = initialisation()
-print(shortest)
+    return shortest
