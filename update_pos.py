@@ -38,7 +38,6 @@ def detect_thymio():
     if (len(bottom)>0 and len(top)>0):
         delta_x = top[0][0] - bottom[0][0]
         delta_y = top[0][1] - bottom[0][1]
-        midddle = [(top[0][0]+bottom[0][0])/2, (top[0][1]+bottom[0][1])/2]
 
         if (delta_x !=0):
             angle = np.arctan2(delta_y, delta_x)
@@ -46,15 +45,6 @@ def detect_thymio():
             angle = np.pi/2
             if(angle < 0):
                 angle = angle + 2*np.pi
-        return middle, angle
+        return bottom, angle
     else :
         return 0
-
-while True:
-    print ('maxou le canard')
-    if (detect_thymio() != 0):
-        top, bottom, angle = detect_thymio()
-        print (top)
-        print (bottom)
-        print (angle*180/np.pi)
-    time.sleep(5)

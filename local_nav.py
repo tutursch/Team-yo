@@ -22,6 +22,15 @@ def sensor_val_to_cm_dist(val):
     f = interp1d(sensor_measurements, sensor_distances)
     return np.asscalar(f(val))
 
+def calculation_distance_and_angle(position_thymio, position_goal):
+    t_x = position_thymio[0]
+    t_y = position_thymio[1]
+    g_x = position_goal[0]
+    g_y = position_goal[1]
+    distance = np.around(np.sqrt(np.power(t_x - g_x, 2) + np.power(t_y - g_y, 2)), 3)
+    angle = np.around(np.arctan((position_goal[1] - position_thymio[1]) / (position_goal[0] - position_thymio[0])), 3)
+    return distance, angle
+
 def checkObstacle(sensor):
     print("checkObstacle")    
 
