@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from numpy.lib.twodim_base import mask_indices
+import time
 
 VideoCap = cv2.VideoCapture(0)
 
@@ -34,8 +35,26 @@ def detect_thymio():
         c=max(elements_bottom, key=cv2.contourArea)
         ((x, y), radius)=cv2.minEnclosingCircle(c)
         bottom.append(np.array([int(x), int(y)]))
-    delta_x = top[0][0] - bottom[0][0]
-    delta_y = top[0][1] - bottom[0][1]
-    angle = np.arctan2(delta_y/delta_x)
+    if (len(bottom)>0 and len(top)>0):
+        delta_x = top[0][0] - bottom[0][0]
+        delta_y = top[0][1] - bottom[0][1]
+        midddle = [(top[0][0]+bottom[0][0])/2, (top[0][1]+bottom[0][1])/2]
 
-    return top, bottom, angle
+        if (delta_x !=0):
+            angle = np.arctan2(delta_y, delta_x)
+        else:
+            angle = np.pi/2
+            if(angle < 0):
+                angle = angle + 2*np.pi
+        return middle, angle
+    else :
+        return 0
+
+while True:
+    print ('maxou le canard')
+    if (detect_thymio() != 0):
+        top, bottom, angle = detect_thymio()
+        print (top)
+        print (bottom)
+        print (angle*180/np.pi)
+    time.sleep(5)
