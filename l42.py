@@ -3,6 +3,8 @@ import cv2
 from numpy.lib.twodim_base import mask_indices
 from VisGraph import *
 
+VideoCap = cv2.VideoCapture(0)
+
 class KalmanFilter(object):
     def __init__(self, dt, point):
         self.dt=dt
@@ -49,30 +51,30 @@ class KalmanFilter(object):
         return self.E
 
 
-lo_blue=np.array([80, 50, 50])
-hi_blue=np.array([100, 255, 255])
-green = 70
-lo_green = np.array([green-10, 100, 50])
-hi_green = np.array([green+10, 255, 255])
+#lo_blue=np.array([80, 50, 50])
+#hi_blue=np.array([100, 255, 255])
+#green = 70
+#lo_green = np.array([green-10, 100, 50])
+#hi_green = np.array([green+10, 255, 255])
 
-def detect_inrange(image, surface, lo, hi):
-    points=[]
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    image=cv2.blur(image, (5, 5))
-    mask=cv2.inRange(image, lo, hi)
-    mask=cv2.erode(mask, None, iterations=2)
-    mask=cv2.dilate(mask, None, iterations=2)
-    elements=cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-    elements=sorted(elements, key=lambda x:cv2.contourArea(x), reverse=True)
-    for element in elements:
-        if cv2.contourArea(element)>surface:
-            ((x, y), rayon)=cv2.minEnclosingCircle(element)
-            points.append(np.array([int(x), int(y)]))
-        else:
-            break
+#def detect_inrange(image, surface, lo, hi):
+#    points=[]
+#    image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+#    image=cv2.blur(image, (5, 5))
+#    mask=cv2.inRange(image, lo, hi)
+#    mask=cv2.erode(mask, None, iterations=2)
+#    mask=cv2.dilate(mask, None, iterations=2)
+#    elements=cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+#    elements=sorted(elements, key=lambda x:cv2.contourArea(x), reverse=True)
+#    for element in elements:
+#        if cv2.contourArea(element)>surface:
+#            ((x, y), rayon)=cv2.minEnclosingCircle(element)
+#            points.append(np.array([int(x), int(y)]))
+#        else:
+#            break
    
 
-    return points, mask
+#    return points, mask
 
 def init_corner():
 
@@ -92,35 +94,34 @@ def init_corner():
 
     return corner_pos
 
-VideoCap = cv2.VideoCapture(0)
-KF = KalmanFilter(0.1, [0,0])
+#KF = KalmanFilter(0.1, [0,0])
 
-def open_cam():
-    ret, frame = VideoCap.read()
+#def open_cam():
+#    ret, frame = VideoCap.read()
     
-    points_b, mask_b = detect_inrange(frame, 800, lo_blue, hi_blue)
-    points_g, mask_g = detect_inrange(frame, 800, lo_green, hi_green)  
+#    points_b, mask_b = detect_inrange(frame, 800, lo_blue, hi_blue)
+#    points_g, mask_g = detect_inrange(frame, 800, lo_green, hi_green)  
         
-    etat = KF.predict().astype(np.int32)
+#    etat = KF.predict().astype(np.int32)
 
-    cv2.circle(frame, (int(etat[0]), int(etat[1])), 2, (0, 255, 0), 5)
-    #cv2.arrowedLine(frame, 
-    #                (etat[0], etat[1]), (etat[0]+etat[2], etat[1]+etat[3]),
-    #                color = (0, 255, 0),
-    #                thickness=3,
-    #                tipLength=0.2)
-    if(len(points_b)>0):
-        cv2.circle(frame, (points_b[0][0], points_b[0][1]), 10, (0, 0, 255), 2)
-        KF.update(np.expand_dims(points_b[0], axis=-1))
+#    cv2.circle(frame, (int(etat[0]), int(etat[1])), 2, (0, 255, 0), 5)
+#    #cv2.arrowedLine(frame, 
+#    #                (etat[0], etat[1]), (etat[0]+etat[2], etat[1]+etat[3]),
+#    #                color = (0, 255, 0),
+#    #                thickness=3,
+#    #                tipLength=0.2)
+#    if(len(points_b)>0):
+#        cv2.circle(frame, (points_b[0][0], points_b[0][1]), 10, (0, 0, 255), 2)
+#        KF.update(np.expand_dims(points_b[0], axis=-1))
 
-    if(len(points_g)>0):
-        cv2.circle(frame, (points_g[0][0], points_g[0][1]), 10, (255, 0, 0), 2)
+#    if(len(points_g)>0):
+#        cv2.circle(frame, (points_g[0][0], points_g[0][1]), 10, (255, 0, 0), 2)
 
-    cv2.imshow('image', frame)
-    cv2.imshow('mask blue', mask_b)
-    #cv2.imshow('mask green', mask_g)
-    cv2.waitKey(0)
-    return 1
+#    cv2.imshow('image', frame)
+#    cv2.imshow('mask blue', mask_b)
+#    #cv2.imshow('mask green', mask_g)
+#    cv2.waitKey(0)
+#    return 1
 
 def polygon(corner_pos):
 
@@ -168,7 +169,6 @@ def detect_start_stop ():
         ret, frame = VideoCap.read()
         color_start = 107
         color_stop = 60
-        color_info=(0, 0, 255)
         lo_start = np.array([color_start-5, 100, 50])
         hi_start = np.array([color_start+5, 255,255])
         lo_stop = np.array([color_stop-5, 100, 50])
@@ -237,4 +237,5 @@ def initialisation():
 
     return shortest
 
-
+shortest = initialisation()
+print(shortest)
