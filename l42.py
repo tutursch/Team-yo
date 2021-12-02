@@ -169,7 +169,6 @@ def detect_start_stop ():
         ret, frame = VideoCap.read()
         color_start = 107
         color_stop = 60
-        color_info=(0, 0, 255)
         lo_start = np.array([color_start-5, 100, 50])
         hi_start = np.array([color_start+5, 255,255])
         lo_stop = np.array([color_stop-5, 100, 50])
