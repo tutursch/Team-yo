@@ -29,6 +29,10 @@ def calculation_distance_and_angle(position_thymio, position_goal):
     g_y = position_goal[1]
     distance = np.around(np.sqrt(np.power(t_x - g_x, 2) + np.power(t_y - g_y, 2)), 3)
     angle = np.around(np.arctan((position_goal[1] - position_thymio[1]) / (position_goal[0] - position_thymio[0])), 3)
+    if (position_thymio[0]>position_goal[0] and position_thymio[1]<position_goal[1]):
+        angle = angle + np.pi
+    if (position_thymio[0]>position_goal[0] and position_thymio[1]>position_goal[1]):
+        angle = angle - np.pi
     return distance, angle
 
 def checkObstacle(sensor):
@@ -68,7 +72,17 @@ def pdController(orientation, old_orientation, goal_orientation) :
     kd = 5
 
     error = goal_orientation-orientation
+    if (error > np.pi): 
+        error = error - 2*np.pi
+    if (error < - np.pi):
+        error = error + 2*np.pi
+
     old_error = goal_orientation-old_orientation
+    if (old_error > np.pi): 
+        old_error = old_error - 2*np.pi
+    if (old_error < - np.pi):
+        old_error = old_error + 2*np.pi
+         
     print("error = ")
     print(error)
 
@@ -82,7 +96,7 @@ def localNavigation(theta, old_theta, goal_theta, sensors) :
 
     basic_speed = 100
 
-    control_speed = 3*pdController(theta, old_theta, goal_theta)
+    control_speed = pdController(theta, old_theta, goal_theta)
 
     avoidance_speed = 0
 
