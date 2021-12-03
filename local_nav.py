@@ -32,7 +32,9 @@ def calculation_distance_and_angle(position_thymio, position_goal):
     if (position_thymio[0]>position_goal[0] and position_thymio[1]<position_goal[1]):
         angle = angle + np.pi
     if (position_thymio[0]>position_goal[0] and position_thymio[1]>position_goal[1]):
-        angle = angle - np.pi
+        angle = angle + np.pi
+    if (position_thymio[0]<position_goal[0] and position_thymio[1]>position_goal[1]):
+        angle = angle + 2*np.pi
     return distance, angle
 
 def checkObstacle(sensor):
