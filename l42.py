@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 from numpy.lib.twodim_base import mask_indices
 from VisGraph import *
+import time
 
 VideoCap = cv2.VideoCapture(0)
 
@@ -165,14 +166,15 @@ def polygon(corner_pos):
 def detect_start_stop ():
     start=[]
     stop=[]
-    while(len(start)==0 or len(stop)==0):
+    while(len(stop)==0 or (len(start)==0)): #remettre len(start)
         ret, frame = VideoCap.read()
-        color_start = 107
-        color_stop = 40
-        lo_start = np.array([color_start-5, 100, 50])
-        hi_start = np.array([color_start+5, 255,255])
-        lo_stop = np.array([color_stop-5, 100, 50])
-        hi_stop = np.array([color_stop+5, 255,255])
+        print("No detection...")
+        color_start = 25
+        color_stop = 70
+        lo_start = np.array([color_start-10, 80, 50])
+        hi_start = np.array([color_start+10, 120,110])
+        lo_stop = np.array([color_stop-15, 70, 30])
+        hi_stop = np.array([color_stop+15, 140,100])
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         image = cv2.blur(image, (5, 5))
         mask_start = cv2.inRange(image, lo_start, hi_start)
