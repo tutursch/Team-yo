@@ -11,13 +11,14 @@ def detect_thymio():
     bottom=[]
  
     while(len(bottom) == 0 or len(top) == 0):
+        print('No thymio')
         ret, frame = VideoCap.read()
-        color_top = 15
+        color_top = 13
         color_bottom = 175
-        lo_top = np.array([color_top-10, 90, 60])
-        hi_top = np.array([color_top+10, 150, 140])
-        lo_bottom = np.array([175-10, 130, 70])
-        hi_bottom = np.array([175+10, 220,150])
+        lo_top = np.array([color_top-10, 40, 110])
+        hi_top = np.array([color_top+10, 85, 155])
+        lo_bottom = np.array([color_bottom-10, 140, 90])
+        hi_bottom = np.array([color_bottom+10, 200, 155])
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         image = cv2.blur(image, (5, 5))
         mask_top = cv2.inRange(image, lo_top, hi_top)
@@ -53,23 +54,23 @@ def detect_thymio():
            
             return bottom[0], angle
 
-while(True):
-    bottom, top, angle_thymio = detect_thymio()
-    start, stop = detect_start_stop()
-    distance, angle = calculation_distance_and_angle(bottom, stop[0])
-    #left_speed, right_speed = localNavigation(, , , 0) :
-    print("STOP = ")
-    print(stop)
-#    print("START = ")
-#    print(start)
-#    print("BOTTOM = ")
-#    print(bottom)
-#    print("TOP = ")
-#    print(top)
-    print("ANGLE THYMIO = :")
-    print(angle_thymio)
-    print("DISTANCE = ")
-    print(distance)
-    print("Angle = ")
-    print(angle)
-    time.sleep(5)
+# while(True):
+#     bottom, top, angle_thymio = detect_thymio()
+#     start, stop = detect_start_stop()
+#     distance, angle = calculation_distance_and_angle(bottom, stop[0])
+#     #left_speed, right_speed = localNavigation(, , , 0) :
+#     print("STOP = ")
+#     print(stop)
+# #    print("START = ")
+# #    print(start)
+# #    print("BOTTOM = ")
+# #    print(bottom)
+# #    print("TOP = ")
+# #    print(top)
+#     print("ANGLE THYMIO = :")
+#     print(angle_thymio)
+#     print("DISTANCE = ")
+#     print(distance)
+#     print("Angle = ")
+#     print(angle)
+#     time.sleep(5)

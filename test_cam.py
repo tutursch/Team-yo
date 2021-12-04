@@ -21,9 +21,9 @@ def souris(event, x, y, flags, param):
 
 s=0
 v=0
-color=100
-lo = np.array([color-10, 65-10, 117-10])
-hi = np.array([color+10, 65+10, 117+10])
+color=175
+lo = np.array([color-10, 140, 90])
+hi = np.array([color+10, 200, 155])
 color_info=(0, 0, 255)
 cap=cv2.VideoCapture(0)
 cv2.namedWindow('Camera')
