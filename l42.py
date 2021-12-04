@@ -169,12 +169,12 @@ def detect_start_stop ():
     while(len(stop)==0 or (len(start)==0)): #remettre len(start)
         ret, frame = VideoCap.read()
         print("No detection...")
-        color_start = 25
-        color_stop = 70
-        lo_start = np.array([color_start-10, 80, 50])
-        hi_start = np.array([color_start+10, 120,110])
-        lo_stop = np.array([color_stop-15, 70, 30])
-        hi_stop = np.array([color_stop+15, 140,100])
+        color_start = 100
+        color_stop = 60
+        lo_start = np.array([color_start-10, 65-10, 117-10])
+        hi_start = np.array([color_start+10, 65+10, 117+10])
+        lo_stop = np.array([color_stop-20,84-5, 55-5])
+        hi_stop = np.array([color_stop+20, 84+5,55+5])
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         image = cv2.blur(image, (5, 5))
         mask_start = cv2.inRange(image, lo_start, hi_start)

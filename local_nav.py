@@ -85,8 +85,6 @@ def pdController(orientation, old_orientation, goal_orientation) :
     if (old_error < - np.pi):
         old_error = old_error + 2*np.pi
          
-    print("error = ")
-    print(error)
 
     control_speed = kp * error + kd * (error-old_error)
 
@@ -99,6 +97,8 @@ def localNavigation(theta, old_theta, goal_theta, sensors) :
     basic_speed = 100
 
     control_speed = pdController(theta, old_theta, goal_theta)
+    print('Angle à parcourir : ')
+    print(goal_theta)
 
     avoidance_speed = 0
 
