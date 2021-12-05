@@ -44,22 +44,22 @@ def calculation_distance_and_angle(position_thymio, position_goal):
 def checkObstacle(sensor):
   #  print("checkObstacle")    
 
-    obstacle_trigger = 10
+    obstacle_trigger = 0
     obstacle = False
 
     for i in range(len(sensor)-2) :
         if sensor[i] > obstacle_trigger :
             obstacle = True
 
-
+    print(sensor)
     return obstacle
 
 def avoidObstacle(sensor):
 
-    w = [40,  20, -20, -20, -40]
+    w = [80,  40, -40, -40, -80]
 
     # Scale factors for sensors and constant factor
-    sensor_scale = 800
+    sensor_scale = 100
     avoidance_speed = 0
 
     for i in range(len(sensor)-2) :
@@ -99,7 +99,7 @@ def pdController(orientation, old_orientation, goal_orientation) :
 def localNavigation(theta, old_theta, goal_theta, sensors) :
 
     basic_speed = 150
-
+    local_avoidance = 0.2
     control_speed = pdController(theta, old_theta, goal_theta)
 
     avoidance_speed = 0
@@ -108,7 +108,8 @@ def localNavigation(theta, old_theta, goal_theta, sensors) :
     if obstacle : 
         avoidance_speed = avoidObstacle(sensors)
 
-    left_speed = basic_speed + 10 * control_speed + avoidance_speed
-    right_speed = basic_speed - 10 * control_speed - avoidance_speed
+    
+    left_speed = basic_speed + 10 * control_speed + avoidance_speed*local_avoidance
+    right_speed = basic_speed - 10 * control_speed - avoidance_speed*local_avoidance
 
     return left_speed, right_speed

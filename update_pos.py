@@ -15,8 +15,8 @@ def detect_thymio():
         ret, frame = VideoCap.read()
         color_top = 13
         color_bottom = 175
-        lo_top = np.array([color_top-10, 40, 110])
-        hi_top = np.array([color_top+10, 85, 155])
+        lo_top = np.array([color_top-10, 50, 110])
+        hi_top = np.array([color_top+10, 110, 155])
         lo_bottom = np.array([color_bottom-10, 140, 90])
         hi_bottom = np.array([color_bottom+10, 200, 155])
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
