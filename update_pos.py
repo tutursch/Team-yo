@@ -3,10 +3,11 @@ import cv2
 from numpy.lib.twodim_base import mask_indices
 from l42 import *
 from local_nav import *
+from kalman_filter import *
 
 VideoCap = cv2.VideoCapture(0)
 
-def detect_thymio():
+def detect_thymio(pos_1, angle_1, motor_left, motor_right, P_1, KF):
     top=[]
     bottom=[]
     i = 0
@@ -16,9 +17,9 @@ def detect_thymio():
         ret, frame = VideoCap.read()
         color_top = 13
         color_bottom = 175
-        lo_top = np.array([color_top-10, 50, 110])
+        lo_top = np.array([color_top-10, 50, 80])
         hi_top = np.array([color_top+10, 110, 165])
-        lo_bottom = np.array([color_bottom-10, 140, 90])
+        lo_bottom = np.array([color_bottom-10, 140, 70])
         hi_bottom = np.array([color_bottom+10, 200, 165])
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         image = cv2.blur(image, (5, 5))
@@ -55,8 +56,17 @@ def detect_thymio():
                 angle = np.pi/2
             if(angle < 0):
                 angle = angle + 2*np.pi
-           
-            return bottom[0], angle
+
+    if (len(bottom) == 0 or len(top) == 0):
+        state, prob = KF.predict(pos_1, angle_1, motor_left, motor_right, P_1)
+        pos = [state[0][0], state[1][0]]
+        angle_kalman = state[2][0]
+        return pos, angle_kalman, prob
+    else: 
+        z = [[bottom[0][0], bottom[0][1], angle]]
+        prob = KF.update(z)
+        return bottom[0], angle, prob 
+
 
 # while(True):
 #     bottom, top, angle_thymio = detect_thymio()
