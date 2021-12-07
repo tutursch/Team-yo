@@ -1,9 +1,6 @@
 import numpy as np
 from numpy.lib.function_base import select
-
-SPEED_THYMIO_TO_CM = 0.0326 
-DISTANCE_WHEEL = 9.5
-CM_TO_PIXEL = 5.854
+import time
 
 class KalmanFilter(object):
     def __init__(self, dt):
@@ -45,18 +42,22 @@ class KalmanFilter(object):
                             [angle_1]])
 
         #vitesse angulaire 
-        self.omega = (motor_left - motor_right)*np.pi/180
+        self.omega = ((motor_left - motor_right)*np.pi/180)
         #radial speed
-        self.v = (motor_right+motor_left)/2
+        self.v = ((motor_right+motor_left)/2)/3.3
         #vecteur vitesse
         self.V = np.array([[self.v],
                            [self.omega]])
+
         self.E = np.dot(self.A, self.E) + np.dot(self.B, self.V) + self.ERROR
+
 
         # Calcul de la covariance de l'erreur
         self.P = np.dot(np.dot(self.A, self.P), self.A.T) + (self.Q)
 
         state = [self.E[0][0], self.E[1][0], self.E[2][0]]
+        print(self.E[2][0])
+
         return state
 
     def update(self, z):

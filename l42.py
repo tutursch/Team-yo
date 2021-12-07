@@ -4,8 +4,6 @@ from numpy.lib.twodim_base import mask_indices
 from VisGraph import *
 import time
 
-VideoCap = cv2.VideoCapture(0)
-
 # class KalmanFilter(object):
 #     def __init__(self, dt, point):
 #         self.dt=dt
@@ -77,9 +75,7 @@ VideoCap = cv2.VideoCapture(0)
 
 #    return points, mask
 
-def init_corner():
-
-    ret, frame = VideoCap.read()
+def init_corner(frame):
 
     gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray_img = np.float32(gray_img)
@@ -124,9 +120,8 @@ def init_corner():
 #    cv2.waitKey(0)
 #    return 1
 
-def polygon(corner_pos):
+def polygon(corner_pos, frame):
 
-    ret, frame = VideoCap.read()
     threshold = 30
     #Grayscale
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -163,49 +158,44 @@ def polygon(corner_pos):
     
     return all_polys
 
-def detect_start_stop ():
+def detect_start_stop (frame):
     start=[]
     stop=[]
-    while(len(stop)==0 or (len(start)==0)): #remettre len(start)
-        ret, frame = VideoCap.read()
-        color_start = 105
-        color_stop = 70
-        lo_start = np.array([color_start-10, 135-25, 65-15])
-        hi_start = np.array([color_start+10, 135+25, 65+15])
-        lo_stop = np.array([color_stop-20, 100-15, 50-10])
-        hi_stop = np.array([color_stop+20, 100+15, 50+10])
-        image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        image = cv2.blur(image, (5, 5))
-        mask_start = cv2.inRange(image, lo_start, hi_start)
-        mask_stop = cv2.inRange(image, lo_stop, hi_stop)
-        mask_start=cv2.erode(mask_start, None, iterations=2)
-        mask_start=cv2.dilate(mask_start, None, iterations=2)
-        mask_stop=cv2.erode(mask_stop, None, iterations=2)
-        mask_stop=cv2.dilate(mask_stop, None, iterations=2)
-        elements_start=cv2.findContours(mask_start, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-        elements_start=sorted(elements_start, key=lambda x:cv2.contourArea(x), reverse=True)
-        elements_stop=cv2.findContours(mask_stop, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-        elements_stop=sorted(elements_stop, key=lambda x:cv2.contourArea(x), reverse=True)
-        if len(elements_start) > 0:
-            c=max(elements_start, key=cv2.contourArea)
-            ((x, y), radius)=cv2.minEnclosingCircle(c)
-            if (len(start)==0):
-                start.append(np.array([int(x), int(y)]))
-        if len(elements_stop) > 0:
-            c=max(elements_stop, key=cv2.contourArea)
-            ((x, y), radius)=cv2.minEnclosingCircle(c)
-            if (len(stop)==0):
-                stop.append(np.array([int(x), int(y)]))
+    print('bloqué')
+    color_start = 105
+    color_stop = 70
+    lo_start = np.array([color_start-10, 135-25, 65-15])
+    hi_start = np.array([color_start+10, 135+25, 65+15])
+    lo_stop = np.array([color_stop-20, 100-15, 50-10])
+    hi_stop = np.array([color_stop+20, 100+15, 50+10])
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    image = cv2.blur(image, (5, 5))
+    mask_start = cv2.inRange(image, lo_start, hi_start)
+    mask_stop = cv2.inRange(image, lo_stop, hi_stop)
+    mask_start=cv2.erode(mask_start, None, iterations=2)
+    mask_start=cv2.dilate(mask_start, None, iterations=2)
+    mask_stop=cv2.erode(mask_stop, None, iterations=2)
+    mask_stop=cv2.dilate(mask_stop, None, iterations=2)
+    elements_start=cv2.findContours(mask_start, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+    elements_start=sorted(elements_start, key=lambda x:cv2.contourArea(x), reverse=True)
+    elements_stop=cv2.findContours(mask_stop, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+    elements_stop=sorted(elements_stop, key=lambda x:cv2.contourArea(x), reverse=True)
+    if len(elements_start) > 0:
+        c=max(elements_start, key=cv2.contourArea)
+        ((x, y), radius)=cv2.minEnclosingCircle(c)
+        if (len(start)==0):
+            start.append(np.array([int(x), int(y)]))
+    if len(elements_stop) > 0:
+        c=max(elements_stop, key=cv2.contourArea)
+        ((x, y), radius)=cv2.minEnclosingCircle(c)
+        if (len(stop)==0):
+            stop.append(np.array([int(x), int(y)]))
     return start, stop
  
-def initialisation():
-    ret, frame = VideoCap.read()
+def initialisation(frame, start, stop):
+    corners_pos = init_corner(frame)
 
-    corners_pos = init_corner()
-
-    poly = polygon(corners_pos)
-
-    start, stop = detect_start_stop()
+    poly = polygon(corners_pos, frame)
 
     all_polys_point = []
 

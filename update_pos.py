@@ -5,21 +5,19 @@ from l42 import *
 from local_nav import *
 from kalman_filter import *
 
-VideoCap = cv2.VideoCapture(0)
-
-def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF):
+def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF, frame):
     top=[]
     bottom=[]
+    middle = [0, 0]
     i = 0
-    while(i < 5 and (len(bottom) == 0 or len(top) == 0)):
+    while(i < 2 and (len(bottom) == 0 or len(top) == 0)):
         i = i+1
         print('No thymio')
-        ret, frame = VideoCap.read()
         color_top = 13
         color_bottom = 175
         lo_top = np.array([color_top-10, 50, 80])
         hi_top = np.array([color_top+10, 110, 165])
-        lo_bottom = np.array([color_bottom-10, 140, 70])
+        lo_bottom = np.array([color_bottom-10, 110, 70])
         hi_bottom = np.array([color_bottom+10, 200, 165])
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         image = cv2.blur(image, (5, 5))
@@ -49,6 +47,8 @@ def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF):
         if (len(bottom)>0 and len(top)>0):
             delta_x = top[0][0] - bottom[0][0]
             delta_y = top[0][1] - bottom[0][1]
+            middle[0] = (bottom[0][0]+top[0][0])/2
+            middle[1] = (bottom[0][1]+top[0][1])/2
 
             if (delta_x !=0):
                 angle = np.arctan2(delta_y, delta_x)
@@ -69,15 +69,10 @@ def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF):
         return pos, angle_kalman
     else: 
         print('Update')
-        z = [[bottom[0][0], bottom[0][1], angle]]
+        z = [[middle[0], middle[1], angle]]
         KF.update(z)
-        return bottom[0], angle
+        return middle, angle
 
-def show_camera(x, y):
-    ret, frame = VideoCap.read()
-
-    cv2.circle(frame, (int(x), int(y)), 10, (255, 0, 0), 2)
-    cv2.imshow('image', frame)
 
 # while(True):
 #     bottom, top, angle_thymio = detect_thymio()
