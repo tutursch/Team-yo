@@ -9,16 +9,17 @@ VideoCap = cv2.VideoCapture(0)
 def detect_thymio():
     top=[]
     bottom=[]
- 
-    while(len(bottom) == 0 or len(top) == 0):
+    i = 0
+    while(i <= 5 or (len(bottom) == 0 or len(top) == 0)):
+        i = i+1
         print('No thymio')
         ret, frame = VideoCap.read()
         color_top = 13
         color_bottom = 175
         lo_top = np.array([color_top-10, 50, 110])
-        hi_top = np.array([color_top+10, 110, 155])
+        hi_top = np.array([color_top+10, 110, 165])
         lo_bottom = np.array([color_bottom-10, 140, 90])
-        hi_bottom = np.array([color_bottom+10, 200, 155])
+        hi_bottom = np.array([color_bottom+10, 200, 165])
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         image = cv2.blur(image, (5, 5))
         mask_top = cv2.inRange(image, lo_top, hi_top)
@@ -31,6 +32,9 @@ def detect_thymio():
         elements_top = sorted(elements_top, key=lambda x:cv2.contourArea(x), reverse=True)
         elements_bottom = cv2.findContours(mask_bottom, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
         elements_bottom = sorted(elements_bottom, key=lambda x:cv2.contourArea(x), reverse=True)
+        #if(i==5):
+        #    kalmanFiler()
+        #    return bottom[0], angle
         if len(elements_top) > 0:
             c=max(elements_top, key=cv2.contourArea)
             ((x, y), radius)=cv2.minEnclosingCircle(c)
