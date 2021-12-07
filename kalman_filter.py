@@ -10,48 +10,54 @@ class KalmanFilter(object):
 
         self.dt = dt 
 
-        self.A = np.matrix([[1, 0, 0, 0],
-                            [0, 1, 0, 0],
-                            [0, 0, 1, 0],
-                            [0, 0, 0, 1]])
+        self.A = np.array([[1, 0, 0],
+                            [0, 1, 0],
+                            [0, 0, 1]])
 
-        self.Q = np.matrix([[1.0,   0,   0],
+        self.Q = np.array([[1.0,  0,   0],
                            [  0, 1.0,   0],
                            [  0,   0, 1.0]])
 
-        self.R = np.matrix([[1.0,   0,    0],
+        self.R = np.array([[1.0,   0,    0],
                             [  0, 1.0,    0],
                             [  0,    0, 1.0]])
 
-        self.H = np.matrix([[1.0,  0,   0],
-                           [  0,1.0,   0],
-                           [  0,  0, 1.0]])
+        self.H = np.array([[1.0,  0,   0],
+                            [  0,1.0,   0],
+                            [  0,  0, 1.0]])
 
-        self.ERROR = np.matrix([0.07], [0.07], [0.04])
+        self.P = np.array([[1.0,   0,   0],
+                            [  0, 1.0,   0],
+                            [  0,   0, 1.0]])
 
-    def predict(self, pos_1, angle_1, motor_left, motor_right, P_1):
+        self.ERROR = np.array([[0.07], [0.07], [0.04]])
 
-        self.B = np.matrix([[np.cos(angle_1)*self.dt, 0],
+        self.E = np.array([[0], [0], [0]])
+
+    def predict(self, pos_1, angle_1, motor_left, motor_right):
+
+        self.B = np.array([[np.cos(angle_1)*self.dt, 0],
                            [np.sin(angle_1)*self.dt, 0],
                            [0, self.dt]])
 
-        self.E = np.matrix([[pos_1[0]],
-                           [pos_1[1]],
-                           [angle_1]])
+        self.E = np.array([[pos_1[0]],
+                            [pos_1[1]],
+                            [angle_1]])
 
         #vitesse angulaire 
-        self.omega = (motor_left + motor_right)*SPEED_THYMIO_TO_CM/DISTANCE_WHEEL
+        self.omega = (motor_left - motor_right)*np.pi/180
         #radial speed
-        self.v = (motor_right+motor_left)/2*SPEED_THYMIO_TO_CM*CM_TO_PIXEL
+        self.v = (motor_right+motor_left)/2
         #vecteur vitesse
-        self.V = np.matrix([[self.v],
+        self.V = np.array([[self.v],
                            [self.omega]])
         self.E = np.dot(self.A, self.E) + np.dot(self.B, self.V) + self.ERROR
 
         # Calcul de la covariance de l'erreur
-        self.P = np.dot(np.dot(self.A, P_1), self.A.T) + (self.Q)
+        self.P = np.dot(np.dot(self.A, self.P), self.A.T) + (self.Q)
 
-        return self.E, self.P
+        state = [self.E[0][0], self.E[1][0], self.E[2][0]]
+        return state
 
     def update(self, z):
 
@@ -65,7 +71,5 @@ class KalmanFilter(object):
         # Update the state covariance estimate for time k
         I=np.eye(self.H.shape[1])
         self.P = (I-(self.K*self.H))*self.P
-
-        return self.P
 
 

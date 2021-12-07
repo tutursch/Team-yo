@@ -7,11 +7,11 @@ from kalman_filter import *
 
 VideoCap = cv2.VideoCapture(0)
 
-def detect_thymio(pos_1, angle_1, motor_left, motor_right, P_1, KF):
+def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF):
     top=[]
     bottom=[]
     i = 0
-    while(i <= 5 or (len(bottom) == 0 or len(top) == 0)):
+    while(i < 5 and (len(bottom) == 0 or len(top) == 0)):
         i = i+1
         print('No thymio')
         ret, frame = VideoCap.read()
@@ -56,17 +56,28 @@ def detect_thymio(pos_1, angle_1, motor_left, motor_right, P_1, KF):
                 angle = np.pi/2
             if(angle < 0):
                 angle = angle + 2*np.pi
-
+    
     if (len(bottom) == 0 or len(top) == 0):
-        state, prob = KF.predict(pos_1, angle_1, motor_left, motor_right, P_1)
-        pos = [state[0][0], state[1][0]]
-        angle_kalman = state[2][0]
-        return pos, angle_kalman, prob
+        print('Predict')
+        state = KF.predict(pos_1, angle_1, motor_left, motor_right)
+        pos = [state[0], state[1]]
+        print('Position prédite = ')
+        print(pos)
+        angle_kalman = state[2]
+        print("Angle prédit = ")
+        print(angle_kalman)
+        return pos, angle_kalman
     else: 
+        print('Update')
         z = [[bottom[0][0], bottom[0][1], angle]]
-        prob = KF.update(z)
-        return bottom[0], angle, prob 
+        KF.update(z)
+        return bottom[0], angle
 
+def show_camera(x, y):
+    ret, frame = VideoCap.read()
+
+    cv2.circle(frame, (int(x), int(y)), 10, (255, 0, 0), 2)
+    cv2.imshow('image', frame)
 
 # while(True):
 #     bottom, top, angle_thymio = detect_thymio()

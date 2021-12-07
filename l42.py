@@ -6,50 +6,50 @@ import time
 
 VideoCap = cv2.VideoCapture(0)
 
-class KalmanFilter(object):
-    def __init__(self, dt, point):
-        self.dt=dt
+# class KalmanFilter(object):
+#     def __init__(self, dt, point):
+#         self.dt=dt
 
-        # Vecteur d'etat initial
-        self.E=np.matrix([[point[0]], [point[1]], [0], [0]])
+#         # Vecteur d'etat initial
+#         self.E=np.matrix([[point[0]], [point[1]], [0], [0]])
 
-        # Matrice de transition
-        self.A=np.matrix([[1, 0, self.dt, 0],
-                          [0, 1, 0, self.dt],
-                          [0, 0, 1, 0],
-                          [0, 0, 0, 1]])
+#         # Matrice de transition
+#         self.A=np.matrix([[1, 0, self.dt, 0],
+#                           [0, 1, 0, self.dt],
+#                           [0, 0, 1, 0],
+#                           [0, 0, 0, 1]])
 
-        # Matrice d'observation, on observe que x et y
-        self.H=np.matrix([[1, 0, 0, 0],
-                          [0, 1, 0, 0]])
+#         # Matrice d'observation, on observe que x et y
+#         self.H=np.matrix([[1, 0, 0, 0],
+#                           [0, 1, 0, 0]])
 
-        self.Q=np.matrix([[1, 0, 0, 0],
-                          [0, 1, 0, 0],
-                          [0, 0, 1, 0],
-                          [0, 0, 0, 1]])
+#         self.Q=np.matrix([[1, 0, 0, 0],
+#                           [0, 1, 0, 0],
+#                           [0, 0, 1, 0],
+#                           [0, 0, 0, 1]])
 
-        self.R=np.matrix([[1, 0],
-                          [0, 1]])
+#         self.R=np.matrix([[1, 0],
+#                           [0, 1]])
 
-        self.P=np.eye(self.A.shape[1])
+#         self.P=np.eye(self.A.shape[1])
 
-    def predict(self):
-        self.E=np.dot(self.A, self.E)
-        # Calcul de la covariance de l'erreur
-        self.P=np.dot(np.dot(self.A, self.P), self.A.T)+self.Q
-        return self.E
+#     def predict(self):
+#         self.E=np.dot(self.A, self.E)
+#         # Calcul de la covariance de l'erreur
+#         self.P=np.dot(np.dot(self.A, self.P), self.A.T)+self.Q
+#         return self.E
 
-    def update(self, z):
-        # Calcul du gain de Kalman
-        S=np.dot(self.H, np.dot(self.P, self.H.T))+self.R
-        K=np.dot(np.dot(self.P, self.H.T), np.linalg.inv(S))
+#     def update(self, z):
+#         # Calcul du gain de Kalman
+#         S=np.dot(self.H, np.dot(self.P, self.H.T))+self.R
+#         K=np.dot(np.dot(self.P, self.H.T), np.linalg.inv(S))
 
-        # Correction / innovation
-        self.E=np.round(self.E+np.dot(K, (z-np.dot(self.H, self.E))))
-        I=np.eye(self.H.shape[1])
-        self.P=(I-(K*self.H))*self.P
+#         # Correction / innovation
+#         self.E=np.round(self.E+np.dot(K, (z-np.dot(self.H, self.E))))
+#         I=np.eye(self.H.shape[1])
+#         self.P=(I-(K*self.H))*self.P
 
-        return self.E
+#         return self.E
 
 
 #lo_blue=np.array([80, 50, 50])
@@ -168,13 +168,12 @@ def detect_start_stop ():
     stop=[]
     while(len(stop)==0 or (len(start)==0)): #remettre len(start)
         ret, frame = VideoCap.read()
-        print("No detection...")
         color_start = 105
-        color_stop = 60
-        lo_start = np.array([color_start-10, 135-15, 65-15])
-        hi_start = np.array([color_start+10, 135+15, 65+15])
-        lo_stop = np.array([color_stop-20,84-5, 55-5])
-        hi_stop = np.array([color_stop+20, 84+5,55+5])
+        color_stop = 70
+        lo_start = np.array([color_start-10, 135-25, 65-15])
+        hi_start = np.array([color_start+10, 135+25, 65+15])
+        lo_stop = np.array([color_stop-20, 100-15, 50-10])
+        hi_stop = np.array([color_stop+20, 100+15, 50+10])
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         image = cv2.blur(image, (5, 5))
         mask_start = cv2.inRange(image, lo_start, hi_start)

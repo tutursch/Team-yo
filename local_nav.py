@@ -51,7 +51,6 @@ def checkObstacle(sensor):
         if sensor[i] > obstacle_trigger :
             obstacle = True
 
-    print(sensor)
     return obstacle
 
 def avoidObstacle(sensor):
