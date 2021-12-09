@@ -11,13 +11,13 @@ class KalmanFilter(object):
                             [0, 1, 0],
                             [0, 0, 1]])
 
-        self.Q = np.array([[1,  0,   0],
-                           [  0, 1,   0],
-                           [  0,   0, 1]])
+        self.Q = np.array([[10,  0,   0],
+                           [  0, 10,   0],
+                           [  0,   0, 10]])
 
-        self.R = np.array([[10,   0,    0],
-                            [  0, 10,    0],
-                            [  0,    0, 10]])
+        self.R = np.array([[1,   0,    0],
+                            [  0, 1,    0],
+                            [  0,    0, 1]])
 
         self.H = np.array([[1.0,  0,   0],
                             [  0,1.0,   0],
@@ -42,7 +42,7 @@ class KalmanFilter(object):
         #vitesse angulaire 
         self.omega = ((motor_left - motor_right)*np.pi/180)*0.38
         #radial speed
-        self.v = ((motor_right+motor_left)/2)/2.43
+        self.v = ((motor_right+motor_left)/2)/2.46
         #vecteur vitesse
         self.V = np.array([[self.v],
                            [self.omega]])

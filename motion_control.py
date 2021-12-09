@@ -60,8 +60,8 @@ def local_avoidance(sensor):
 
 def pd_controller(orientation, old_orientation, goal_orientation) :
 
-    kp = 15
-    kd = 7
+    kp = 12
+    kd = 6
 
     error = goal_orientation-orientation
     if (error > np.pi): 
