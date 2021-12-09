@@ -161,7 +161,6 @@ def polygon(corner_pos, frame):
 def detect_start_stop (frame):
     start=[]
     stop=[]
-    print('bloqué')
     color_start = 105
     color_stop = 70
     lo_start = np.array([color_start-10, 135-25, 65-15])
