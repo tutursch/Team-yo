@@ -29,8 +29,7 @@ def calculation_distance_and_angle(position_thymio, position_goal):
         angle = angle + 2*np.pi
     return distance, angle
 
-def check_obstacle(sensor):
-    print("checkObstacle")    
+def check_obstacle(sensor):   
 
     obstacle_trigger = 0
     obstacle = False
@@ -76,14 +75,12 @@ def pd_controller(orientation, old_orientation, goal_orientation) :
     if (old_error < - np.pi):
         old_error = old_error + 2*np.pi
          
-
     control_speed = kp * error + kd * (error-old_error)
-
 
     return control_speed
 
 
-def motion_control(theta, old_theta, goal_theta, sensors) :
+def motion_control(theta, old_theta, goal_theta, sensors, avoiding_steps) :
 
     basic_speed = 150
     avoidance_scale = 0.2
@@ -94,9 +91,15 @@ def motion_control(theta, old_theta, goal_theta, sensors) :
     obstacle = check_obstacle(sensors)
     if obstacle : 
         avoidance_speed = local_avoidance(sensors)
+        avoiding_steps = 20
 
-    
-    left_speed = basic_speed + 10 * control_speed + avoidance_speed*avoidance_scale
-    right_speed = basic_speed - 10 * control_speed - avoidance_speed*avoidance_scale
+    if (avoiding_steps > 0) :
+        left_speed = basic_speed + avoidance_speed*avoidance_scale
+        right_speed = basic_speed - avoidance_speed*avoidance_scale
+        avoiding_steps -= 1
+    else :
+        left_speed = basic_speed + 10 * control_speed + avoidance_speed*avoidance_scale
+        right_speed = basic_speed - 10 * control_speed - avoidance_speed*avoidance_scale
 
-    return left_speed, right_speed
+
+    return left_speed, right_speed, avoiding_steps
