@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from numpy.lib.twodim_base import mask_indices
 from l42 import *
-from local_nav import *
+from motion_control import *
 from kalman_filter import *
 
 def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF, frame):
@@ -10,6 +10,7 @@ def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF, frame):
     bottom=[]
     middle = [0, 0]
     i = 0
+    angle = 0
     while(i < 2 and (len(bottom) == 0 or len(top) == 0)):
         i = i+1
         color_top = 13
@@ -52,13 +53,16 @@ def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF, frame):
                 angle = np.pi/2
             if(angle < 0):
                 angle = angle + 2*np.pi
-    if (len(bottom) == 0 or len(top) == 0):
-        state = KF.predict(pos_1, angle_1, motor_left, motor_right)
-        pos = [state[0], state[1]]
-        angle_kalman = state[2]
-        return pos, angle_kalman
-     
-    else:
-        z = [[middle[0], middle[1], angle]]
-        KF.update(z)
-        return middle, angle
+
+    state = KF.predict(pos_1, angle_1, motor_left, motor_right)
+    pos = [state[0], state[1]]
+    angle_kalman = state[2]
+
+    if not(len(bottom) == 0 or len(top) == 0):
+        z = [[middle[0]], [middle[1]], [angle]]
+        state_up = KF.update(z)
+        pos_up = [state_up[0], state_up[1]]
+        angle_up = state_up[2]
+        return pos_up, angle_up
+
+    return pos, angle_kalman

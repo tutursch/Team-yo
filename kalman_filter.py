@@ -11,9 +11,9 @@ class KalmanFilter(object):
                             [0, 1, 0],
                             [0, 0, 1]])
 
-        self.Q = np.array([[10,  0,   0],
-                           [  0, 10,   0],
-                           [  0,   0, 10]])
+        self.Q = np.array([[1,  0,   0],
+                           [  0, 1,   0],
+                           [  0,   0, 1]])
 
         self.R = np.array([[10,   0,    0],
                             [  0, 10,    0],
@@ -60,7 +60,7 @@ class KalmanFilter(object):
     def update(self, z):
 
         # Calculate the measurement residual covariance
-        S = np.dot(np.dot(self.H, self.P), self.H.T) + self.R
+        S = np.dot(self.H, np.dot(self.P, self.H.T)) + self.R
         # Calculate the near-optimal Kalman gain
         K = np.dot(np.dot(self.P, self.H.T), np.linalg.inv(S))
 
@@ -70,5 +70,7 @@ class KalmanFilter(object):
         I=np.eye(self.H.shape[1])
         self.P = (I-(K*self.H))*self.P
 
+        state = [self.E[0][0], self.E[1][0], self.E[2][0]]
+        return state
 
 

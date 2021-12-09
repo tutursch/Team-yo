@@ -10,19 +10,6 @@ import time
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'src'))
 
-def sensor_val_to_cm_dist(val):
-    """
-    Returns the distance corresponding to the sensor value based 
-    on the sensor characteristics
-    :param val: the sensor value that you want to convert to a distance
-    :return: corresponding distance in cm
-    """
-    if val == 0:
-        return np.inf
-    
-    f = interp1d(sensor_measurements, sensor_distances)
-    return np.asscalar(f(val))
-
 def calculation_distance_and_angle(position_thymio, position_goal):
     t_x = position_thymio[0]
     t_y = position_thymio[1]
@@ -42,8 +29,8 @@ def calculation_distance_and_angle(position_thymio, position_goal):
         angle = angle + 2*np.pi
     return distance, angle
 
-def checkObstacle(sensor):
-  #  print("checkObstacle")    
+def check_obstacle(sensor):
+    print("checkObstacle")    
 
     obstacle_trigger = 0
     obstacle = False
@@ -54,9 +41,9 @@ def checkObstacle(sensor):
 
     return obstacle
 
-def avoidObstacle(sensor):
+def local_avoidance(sensor):
 
-    w = [80,  40, -40, -40, -80]
+    w = [80,  80, -40, -80, -80]
 
     # Scale factors for sensors and constant factor
     sensor_scale = 100
@@ -72,10 +59,10 @@ def avoidObstacle(sensor):
 
     return avoidance_speed
 
-def pdController(orientation, old_orientation, goal_orientation) :
+def pd_controller(orientation, old_orientation, goal_orientation) :
 
-    kp = 10
-    kd = 5
+    kp = 15
+    kd = 7
 
     error = goal_orientation-orientation
     if (error > np.pi): 
@@ -96,20 +83,20 @@ def pdController(orientation, old_orientation, goal_orientation) :
     return control_speed
 
 
-def localNavigation(theta, old_theta, goal_theta, sensors) :
+def motion_control(theta, old_theta, goal_theta, sensors) :
 
     basic_speed = 150
-    local_avoidance = 0.2
-    control_speed = pdController(theta, old_theta, goal_theta)
+    avoidance_scale = 0.2
+    control_speed = pd_controller(theta, old_theta, goal_theta)
 
     avoidance_speed = 0
 
-    obstacle = checkObstacle(sensors)
+    obstacle = check_obstacle(sensors)
     if obstacle : 
-        avoidance_speed = avoidObstacle(sensors)
+        avoidance_speed = local_avoidance(sensors)
 
     
-    left_speed = basic_speed + 10 * control_speed + avoidance_speed*local_avoidance
-    right_speed = basic_speed - 10 * control_speed - avoidance_speed*local_avoidance
+    left_speed = basic_speed + 10 * control_speed + avoidance_speed*avoidance_scale
+    right_speed = basic_speed - 10 * control_speed - avoidance_speed*avoidance_scale
 
     return left_speed, right_speed
