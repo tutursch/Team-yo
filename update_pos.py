@@ -12,7 +12,6 @@ def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF, frame):
     i = 0
     while(i < 2 and (len(bottom) == 0 or len(top) == 0)):
         i = i+1
-        print('No thymio')
         color_top = 13
         color_bottom = 175
         lo_top = np.array([color_top-10, 50, 80])
@@ -31,9 +30,6 @@ def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF, frame):
         elements_top = sorted(elements_top, key=lambda x:cv2.contourArea(x), reverse=True)
         elements_bottom = cv2.findContours(mask_bottom, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
         elements_bottom = sorted(elements_bottom, key=lambda x:cv2.contourArea(x), reverse=True)
-        #if(i==5):
-        #    kalmanFiler()
-        #    return bottom[0], angle
         if len(elements_top) > 0:
             c=max(elements_top, key=cv2.contourArea)
             ((x, y), radius)=cv2.minEnclosingCircle(c)
@@ -56,41 +52,13 @@ def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF, frame):
                 angle = np.pi/2
             if(angle < 0):
                 angle = angle + 2*np.pi
-    
     if (len(bottom) == 0 or len(top) == 0):
-        print('Predict')
         state = KF.predict(pos_1, angle_1, motor_left, motor_right)
         pos = [state[0], state[1]]
-        print('Position prédite = ')
-        print(pos)
         angle_kalman = state[2]
-        print("Angle prédit = ")
-        print(angle_kalman)
         return pos, angle_kalman
-    else: 
-        print('Update')
+     
+    else:
         z = [[middle[0], middle[1], angle]]
         KF.update(z)
         return middle, angle
-
-
-# while(True):
-#     bottom, top, angle_thymio = detect_thymio()
-#     start, stop = detect_start_stop()
-#     distance, angle = calculation_distance_and_angle(bottom, stop[0])
-#     #left_speed, right_speed = localNavigation(, , , 0) :
-#     print("STOP = ")
-#     print(stop)
-# #    print("START = ")
-# #    print(start)
-# #    print("BOTTOM = ")
-# #    print(bottom)
-# #    print("TOP = ")
-# #    print(top)
-#     print("ANGLE THYMIO = :")
-#     print(angle_thymio)
-#     print("DISTANCE = ")
-#     print(distance)
-#     print("Angle = ")
-#     print(angle)
-#     time.sleep(5)

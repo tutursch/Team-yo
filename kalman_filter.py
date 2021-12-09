@@ -11,13 +11,13 @@ class KalmanFilter(object):
                             [0, 1, 0],
                             [0, 0, 1]])
 
-        self.Q = np.array([[1.0,  0,   0],
-                           [  0, 1.0,   0],
-                           [  0,   0, 1.0]])
+        self.Q = np.array([[10,  0,   0],
+                           [  0, 10,   0],
+                           [  0,   0, 10]])
 
-        self.R = np.array([[1.0,   0,    0],
-                            [  0, 1.0,    0],
-                            [  0,    0, 1.0]])
+        self.R = np.array([[10,   0,    0],
+                            [  0, 10,    0],
+                            [  0,    0, 10]])
 
         self.H = np.array([[1.0,  0,   0],
                             [  0,1.0,   0],
@@ -26,8 +26,6 @@ class KalmanFilter(object):
         self.P = np.array([[1.0,   0,   0],
                             [  0, 1.0,   0],
                             [  0,   0, 1.0]])
-
-        self.ERROR = np.array([[0.07], [0.07], [0.04]])
 
         self.E = np.array([[0], [0], [0]])
 
@@ -42,35 +40,35 @@ class KalmanFilter(object):
                             [angle_1]])
 
         #vitesse angulaire 
-        self.omega = ((motor_left - motor_right)*np.pi/180)
+        self.omega = ((motor_left - motor_right)*np.pi/180)*0.38
         #radial speed
-        self.v = ((motor_right+motor_left)/2)/3.3
+        self.v = ((motor_right+motor_left)/2)/2.43
         #vecteur vitesse
         self.V = np.array([[self.v],
                            [self.omega]])
 
-        self.E = np.dot(self.A, self.E) + np.dot(self.B, self.V) + self.ERROR
+        self.E = np.dot(self.A, self.E) + np.dot(self.B, self.V)
 
 
         # Calcul de la covariance de l'erreur
         self.P = np.dot(np.dot(self.A, self.P), self.A.T) + (self.Q)
 
         state = [self.E[0][0], self.E[1][0], self.E[2][0]]
-        print(self.E[2][0])
 
         return state
 
     def update(self, z):
 
         # Calculate the measurement residual covariance
-        self.S = np.dot(np.dot(self.H, self.P), self.H.T) + self.R
+        S = np.dot(np.dot(self.H, self.P), self.H.T) + self.R
         # Calculate the near-optimal Kalman gain
-        self.K = np.dot(np.dot(self.P, self.H.T), np.linalg.inv(self.S))
+        K = np.dot(np.dot(self.P, self.H.T), np.linalg.inv(S))
 
         # Calculate an updated state estimate for time k
-        self.E = np.round(self.E+np.dot(self.K, (z-np.dot(self.H, self.E))))
+        self.E = self.E+np.dot(K, (z-np.dot(self.H, self.E)))
         # Update the state covariance estimate for time k
         I=np.eye(self.H.shape[1])
-        self.P = (I-(self.K*self.H))*self.P
+        self.P = (I-(K*self.H))*self.P
+
 
 
