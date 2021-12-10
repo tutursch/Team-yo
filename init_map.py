@@ -4,7 +4,7 @@ from numpy.lib.twodim_base import mask_indices
 from VisGraph import *
 import time
 
-
+# Initialization coordinates of the obstacles' corners
 def init_corner(frame):
 
     gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -22,10 +22,11 @@ def init_corner(frame):
     return corner_pos
 
 
+# Association of each corner to its corresponding polygon
 def polygon(corner_pos, frame):
 
     threshold = 30
-    #Grayscale
+    safety_margin_coeff = 2
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     all_polys = []
@@ -49,10 +50,12 @@ def polygon(corner_pos, frame):
                          if((corner_pos[l][1]>(contours[i][j][0][1]-threshold)) and (corner_pos[l][1]<(contours[i][j][0][1]+threshold))):
 
                             k = l
+                            
+                            # Shift ot the corners' position by a safety margin that is at least half Thymio's width 
                             if(k not in index_ok):
                                 index_ok.append(l)
-                                corner_pos[l][0] = (corner_pos[l][0]-cx)*2+cx
-                                corner_pos[l][1] = (corner_pos[l][1]-cy)*2+cy
+                                corner_pos[l][0] = (corner_pos[l][0]-cx)*safety_margin_coeff+cx
+                                corner_pos[l][1] = (corner_pos[l][1]-cy)*safety_margin_coeff+cy
                                 polys.append(corner_pos[l])
                                
         if (len(polys) != 0):
@@ -60,6 +63,7 @@ def polygon(corner_pos, frame):
     
     return all_polys
 
+# Computation the coordinates of our start and stop
 def detect_start_stop (frame):
     start=[]
     stop=[]
@@ -92,7 +96,8 @@ def detect_start_stop (frame):
         if (len(stop)==0):
             stop.append(np.array([int(x), int(y)]))
     return start, stop
- 
+
+
 def initialisation(frame, start, stop):
     corners_pos = init_corner(frame)
 
@@ -100,7 +105,7 @@ def initialisation(frame, start, stop):
 
     all_polys_point = []
 
-    #transformation into the class point
+    # transformation into the class point
     for i in range(len(poly)):
         polys_point = []
         for j in range(len(poly[i])):
@@ -109,6 +114,7 @@ def initialisation(frame, start, stop):
     start_point = Point(start[0][0], start[0][1])  
     stop_point = Point(stop[0][0], stop[0][1]) 
 
+    #computation of the shortest path
     g = VisGraph()
     g.build(all_polys_point)
     shortest = g.shortest_path(start_point, stop_point)

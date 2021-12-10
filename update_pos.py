@@ -5,6 +5,7 @@ from init_map import *
 from motion_control import *
 from kalman_filter import *
 
+# Detection of Thymio's position and orientation 
 def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF, frame):
     top=[]
     bottom=[]
@@ -13,6 +14,7 @@ def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF, frame):
     angle = 0
     while(i < 2 and (len(bottom) == 0 or len(top) == 0)):
         i = i+1
+        # Detetection of the yellow (top of Thymio) and red (bottom of Thymio) chip
         color_top = 13
         color_bottom = 175
         lo_top = np.array([color_top-10, 50, 80])
@@ -58,6 +60,8 @@ def detect_thymio(pos_1, angle_1, motor_left, motor_right, KF, frame):
     pos = [state[0], state[1]]
     angle_kalman = state[2]
 
+    # Check if Thymio is unseen
+    # If so, we consider the Kalman filter position as the current position
     if not(len(bottom) == 0 or len(top) == 0):
         z = [[middle[0]], [middle[1]], [angle]]
         state_up = KF.update(z)
