@@ -98,6 +98,7 @@ def pd_controller(orientation, old_orientation, goal_orientation) :
 def motion_control(theta, old_theta, goal_theta, sensors, avoiding_steps) :
 
     basic_speed = 150
+    control_scale = 10
     avoidance_scale = 0.2
     control_speed = pd_controller(theta, old_theta, goal_theta)
 
@@ -113,8 +114,8 @@ def motion_control(theta, old_theta, goal_theta, sensors, avoiding_steps) :
         right_speed = basic_speed - avoidance_speed*avoidance_scale
         avoiding_steps -= 1
     else :
-        left_speed = basic_speed + 10 * control_speed + avoidance_speed*avoidance_scale
-        right_speed = basic_speed - 10 * control_speed - avoidance_speed*avoidance_scale
+        left_speed = basic_speed + control_speed*control_scale + avoidance_speed*avoidance_scale
+        right_speed = basic_speed - control_speed*control_scale - avoidance_speed*avoidance_scale
 
 
     return left_speed, right_speed, avoiding_steps
