@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from numpy.lib.twodim_base import mask_indices
 from vis_graph import *
-import time
+
 
 # Initialization coordinates of the obstacles' corners
 def init_corner(frame):
@@ -35,7 +35,6 @@ def polygon(corner_pos, frame):
     edged = cv2.Canny(gray, 30, 200)
     contours, hierarchy = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    poly_found = 0
     k = 0
 
     for i in range(len(contours)):

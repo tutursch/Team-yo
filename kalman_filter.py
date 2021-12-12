@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.lib.function_base import select
-import time
+
 
 # Initialization of all the matrixes and vectors for the kalman filter 
 class KalmanFilter(object):
