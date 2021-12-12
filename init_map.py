@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 from numpy.lib.twodim_base import mask_indices
-from VisGraph import *
+from vis_graph import *
 import time
 
 # Initialization coordinates of the obstacles' corners
